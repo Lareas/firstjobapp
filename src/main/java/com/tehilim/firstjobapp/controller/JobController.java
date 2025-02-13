@@ -2,6 +2,8 @@ package com.tehilim.firstjobapp.controller;
 
 import com.tehilim.firstjobapp.model.Job;
 import com.tehilim.firstjobapp.service.JobService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,19 +17,33 @@ public class JobController {
     }
 
     @GetMapping("/jobs")
-    public List<Job> findAll() {
-        return jobService.findAll();
+    public ResponseEntity<List<Job>> findAll() {
+        return ResponseEntity.ok(jobService.findAll());
     }
 
     @PostMapping("/jobs")
-    public String create(@RequestBody Job job) {
+    public ResponseEntity<String> create(@RequestBody Job job) {
         jobService.createJob(job);
-        return "Job added successfully";
+        return new ResponseEntity<>("Job added successfully", HttpStatus.OK);
     }
 
     @GetMapping("/jobs/{id}")
-    public Job getJobById(@PathVariable Long id) {
-        return jobService.getJobById(id);
+    public ResponseEntity<Job> getJobById(@PathVariable Long id) {
+        Job job = jobService.getJobById(id);
+        if (job != null) {
+            return new ResponseEntity<>(job, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping("/jobs/{id}")
+    public ResponseEntity<String> deleteJob(@PathVariable Long id) {
+        boolean deleted = jobService.deleteById(id);
+        if (deleted) {
+            return new ResponseEntity<>("Job deleted successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 }
